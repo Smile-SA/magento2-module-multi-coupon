@@ -1,0 +1,63 @@
+<?php
+/**
+ * DISCLAIMER
+ * Do not edit or add to this file if you wish to upgrade this module to newer
+ * versions in the future.
+ *
+ * @category  Smile
+ * @package   Smile\MultiCoupon
+ * @author    Romain Ruaud <romain.ruaud@smile.fr>
+ * @copyright 2019 Smile
+ * @license   Open Software License ("OSL") v. 3.0
+ */
+// @codingStandardsIgnoreFile
+?>
+<?php /** @var $block \Smile\MultiCoupon\Block\Cart\Coupon */ ?>
+<?php $coupons = $block->getCouponCodes() ;?>
+<div class="block discount" id="block-discount"
+     data-mage-init='{"collapsible":{"openedState": "active", "saveState": false}}'>
+    <div class="title" data-role="title">
+        <strong id="block-discount-heading" role="heading" aria-level="2"><?= /* @escapeNotVerified */
+            __ ('Apply Discount Code') ?></strong>
+    </div>
+    <div class="content" data-role="content" aria-labelledby="block-discount-heading">
+        <form id="discount-coupon-form"
+              action="<?= /* @escapeNotVerified */
+              $block->getUrl ('checkout/cart/couponPost') ?>"
+              method="post"
+              data-mage-init='{"smileMultiCoupons":{"couponCodeSelector": "#coupon_code",
+                                               "removeCouponSelector": "#remove-coupon",
+                                               "removeCouponValue": "#remove-coupon-value",
+                                               "applyButton": "button.action.apply",
+                                               "cancelButton": "a.action.cancel"}}'>
+            <div class="fieldset coupon<?= !empty($coupons) ? ' applied' : '' ?>">
+                <input type="hidden" name="remove" id="remove-coupon" value="0"/>
+                <div style="padding-bottom:10px">
+                    <div class="control">
+                        <input type="text" class="input-text" id="coupon_code" name="coupon_code"
+                               value=""
+                               placeholder="<?= $block->escapeHtml (__ ('Enter discount code')) ?>"/>
+                    </div>
+                </div>
+
+                <div class="primary">
+                    <button class="action apply primary" type="button" value="<?= /* @escapeNotVerified */
+                    __ ('Apply Discount') ?>">
+                        <span><?= /* @escapeNotVerified */
+                            __ ('Apply Discount') ?></span>
+                    </button>
+                </div>
+                <?php if (!empty($coupons)): ?>
+                    <input type="hidden" name="removeCouponValue" id="remove-coupon-value" value=""/>
+                    <div>
+                        <h3>Applied Coupon</h3>
+                        <?php foreach ($coupons as $value){ ?>
+                            <p><?= /* @escapeNotVerified */ $value ?><a href="#" data-value="<?= /* @escapeNotVerified */ $value ?>" class="action cancel"> Cancel</a></p>
+                        <?php } ?>
+                    </div>
+                <?php endif; ?>
+
+            </div>
+        </form>
+    </div>
+</div>
