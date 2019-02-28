@@ -1,0 +1,36 @@
+{
+    "name": "smile/module-multi-coupon",
+    "type": "magento2-module",
+    "description": "Extension of Magento2 Sales Rule to allow multiple coupon usage.",
+    "keywords": ["magento2", "salesrule", "coupon", "cart", "multiple"],
+    "license": "OSL-3.0",
+    "require": {
+        "magento/framework": "^102.0.0",
+        "magento/module-sales-rule": "^101.1.0"
+    },
+    "require-dev": {
+        "smile/magento2-smilelab-quality-suite": "^1.1.0"
+    },
+    "authors":[
+        {
+            "name": "Romain Ruaud",
+            "email": "romain.ruaud@smile.fr",
+            "homepage": "https://www.smile.eu/",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Smile\\MultiCoupon\\": ""
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://repo.magento.com/"
+        }
+    ]
+}
