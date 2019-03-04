@@ -34,122 +34,97 @@ class CouponPost extends \Magento\Checkout\Controller\Cart\CouponPost
      */
     public function execute()
     {
-        $couponCode = $this->getRequest ()->getParam ('remove') == 1
+        $couponCode = $this->getRequest()->getParam('remove') == 1
             ? ''
-            : trim ($this->getRequest ()->getParam ('coupon_code'));
+            : trim($this->getRequest()->getParam('coupon_code'));
 
-        $cartQuote = $this->cart->getQuote ();
-        $oldCouponCode = $cartQuote->getCouponCode ();
+        $cartQuote     = $this->cart->getQuote();
+        $oldCouponCode = $cartQuote->getCouponCode();
 
-        $codeLength = strlen ($couponCode);
-        if (!$codeLength && !strlen ($oldCouponCode)) {
-            return $this->_goBack ();
+        $codeLength = strlen($couponCode);
+        if (!$codeLength && !strlen($oldCouponCode)) {
+            return $this->_goBack();
         }
 
         try {
             $isCodeLengthValid = $codeLength && $codeLength <= \Magento\Checkout\Helper\Cart::COUPON_CODE_MAX_LENGTH;
-
-            $itemsCount = $cartQuote->getItemsCount ();
+            $itemsCount        = $cartQuote->getItemsCount();
             if ($itemsCount) {
-                /** if there is item in the cart*/
-                $cartQuote->getShippingAddress ()->setCollectShippingRates (true);
+                $cartQuote->getShippingAddress()->setCollectShippingRates(true);
 
                 if ($oldCouponCode) {
-
-                    $couponRemove = $this->getRequest ()->getParam ('removeCouponValue');
-
-                    // split the old coupon into any array
-                    $oldCouponArray = explode (',', $oldCouponCode);
+                    $couponRemove   = $this->getRequest()->getParam('removeCouponValue');
+                    $oldCouponArray = explode(',', $oldCouponCode);
 
                     if ($couponRemove != "") {
-
-                        // remove the coupon if it exist
-                        $oldCouponArray = array_diff ($oldCouponArray, array($couponRemove));
-
-                        // change it back to string
-                        $oldCouponCode = implode (',', $oldCouponArray);
-
-
-                        $cartQuote->setCouponCode ($oldCouponCode)->save ();
+                        $oldCouponCode = implode(',', array_diff($oldCouponArray, [$couponRemove]));
+                        $cartQuote->setCouponCode($oldCouponCode)->collectTotals();
                     } else {
-
                         $couponUpdate = $oldCouponCode;
+                        $coupon       = $this->couponFactory->create();
+                        $coupon->load($couponCode, 'code');
 
-                        // VALIDATE THE COUPON BEFORE SAVING IT
-                        $coupon = $this->couponFactory->create ();
-                        $coupon->load ($couponCode, 'code');
-
-                        if($coupon->getCode ()) {
-                            if (!in_array ($couponCode, $oldCouponArray)) {
+                        if ($coupon->getCode()) {
+                            if (!in_array($couponCode, $oldCouponArray)) {
                                 $couponUpdate = $oldCouponCode . ',' . $couponCode;
                             }
                         }
-                        // proceed to save
-                        $cartQuote->setCouponCode ($isCodeLengthValid ? $couponUpdate : '')->collectTotals ();
-                        $cartQuote->setCouponCode ($couponUpdate)->save ();
+                        $cartQuote->setCouponCode($isCodeLengthValid ? $couponUpdate : '')->collectTotals();
                     }
                 } else {
-                    $cartQuote->setCouponCode ($isCodeLengthValid ? $couponCode : '')->collectTotals ();
-
+                    $cartQuote->setCouponCode($isCodeLengthValid ? $couponCode : '')->collectTotals();
                 }
-
-                $this->quoteRepository->save ($cartQuote);
-
+                $this->quoteRepository->save($cartQuote);
             }
 
-
-
             if ($codeLength) {
-                $escaper = $this->_objectManager->get (Escaper::class);
-                $coupon = $this->couponFactory->create ();
-                $coupon->load ($couponCode, 'code');
+                $escaper = $this->_objectManager->get(Escaper::class);
+                $coupon  = $this->couponFactory->create();
+                $coupon->load($couponCode, 'code');
                 if (!$itemsCount) {
-                    if ($isCodeLengthValid && $coupon->getId ()) {
-                        $this->_checkoutSession->getQuote ()->setCouponCode ($oldCouponCode)->save ();
-                        $this->messageManager->addSuccess (
-                            __ (
+                    if ($isCodeLengthValid && $coupon->getId()) {
+                        $this->_checkoutSession->getQuote()->setCouponCode($oldCouponCode)->save();
+                        $this->messageManager->addSuccessMessage(
+                            __(
                                 'You used coupon code "%1".',
-                                $escaper->escapeHtml ($couponCode)
+                                $escaper->escapeHtml($couponCode)
                             )
                         );
                     } else {
-                        $this->messageManager->addError (
-                            __ (
+                        $this->messageManager->addErrorMessage(
+                            __(
                                 'The coupon code "%1" is not valid.',
-                                $escaper->escapeHtml ($couponCode)
+                                $escaper->escapeHtml($couponCode)
                             )
                         );
                     }
                 } else {
-                    /** split the coupon and get the last one */
-                    $cSplit = explode (",", $cartQuote->getCouponCode ());
-
-                    if ($isCodeLengthValid && $coupon->getId () && in_array ($couponCode, $cSplit)) {
-                        $this->messageManager->addSuccess (
-                            __ (
+                    if ($isCodeLengthValid && $coupon->getId() && in_array($couponCode, explode(",", $cartQuote->getCouponCode()))) {
+                        $this->messageManager->addSuccessMessage(
+                            __(
                                 'You used coupon code "%1".',
-                                $escaper->escapeHtml ($couponCode)
+                                $escaper->escapeHtml($couponCode)
                             )
                         );
                     } else {
-                        $this->messageManager->addError (
-                            __ (
+                        $this->messageManager->addError(
+                            __(
                                 'The coupon code "%1" is not valid.',
-                                $escaper->escapeHtml ($couponCode)
+                                $escaper->escapeHtml($couponCode)
                             )
                         );
                     }
                 }
             } else {
-                $this->messageManager->addSuccess (__ ('You canceled the coupon code.'));
+                $this->messageManager->addSuccessMessage(__('You canceled the coupon code.'));
             }
         } catch (LocalizedException $e) {
-            $this->messageManager->addError ($e->getMessage ());
+            $this->messageManager->addErrorMessage($e->getMessage());
         } catch (\Exception $e) {
-            $this->messageManager->addError (__ ('We cannot apply the coupon code.'));
-            $this->_objectManager->get (\Psr\Log\LoggerInterface::class)->critical ($e);
+            $this->messageManager->addErrorMessage(__('We cannot apply the coupon code.'));
+            $this->_objectManager->get(\Psr\Log\LoggerInterface::class)->critical($e);
         }
 
-        return $this->_goBack ();
+        return $this->_goBack();
     }
 }
