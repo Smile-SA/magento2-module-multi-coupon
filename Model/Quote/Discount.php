@@ -24,6 +24,8 @@ class Discount extends \Magento\SalesRule\Model\Quote\Discount
 {
     /**
      * {@inheritdoc}
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity) inherited
+     * @SuppressWarnings(PHPMD.ElseExpression) inherited
      */
     public function collect(
         \Magento\Quote\Model\Quote $quote,
