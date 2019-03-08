@@ -28,16 +28,15 @@ class CouponPost extends \Magento\Checkout\Controller\Cart\CouponPost
     /**
      * Initialize coupon
      *
+     * @SuppressWarnings(PHPMD.ElseExpression)
+     *
      * @return \Magento\Framework\Controller\Result\Redirect
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function execute()
     {
-        $couponCode = $this->getRequest()->getParam('remove') == 1
-            ? ''
-            : trim($this->getRequest()->getParam('coupon_code'));
-
+        $couponCode    = $this->getRequest()->getParam('remove') == 1 ? '' : trim($this->getRequest()->getParam('coupon_code'));
         $cartQuote     = $this->cart->getQuote();
         $oldCouponCode = $cartQuote->getCouponCode();
 

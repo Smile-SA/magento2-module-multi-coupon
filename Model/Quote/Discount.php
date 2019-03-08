@@ -61,7 +61,7 @@ class Discount extends \Magento\SalesRule\Model\Quote\Discount
                 if ($item->getNoDiscount() || !$this->calculator->canApplyDiscount($item)) {
                     $item->setDiscountAmount(0);
                     $item->setBaseDiscountAmount(0);
-                    // ensure my children are zeroed out
+                    // Ensure my children are zeroed out.
                     if ($item->getHasChildren() && $item->isChildrenCalculated()) {
                         foreach ($item->getChildren() as $child) {
                             $child->setDiscountAmount(0);
@@ -70,7 +70,7 @@ class Discount extends \Magento\SalesRule\Model\Quote\Discount
                     }
                     continue;
                 }
-                // to determine the child item discount, we calculate the parent
+                // To determine the child item discount, we calculate the parent.
                 if ($item->getParentItem()) {
                     continue;
                 }
